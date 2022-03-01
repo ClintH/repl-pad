@@ -6,7 +6,9 @@ export const css = `
       --font-size: 1em;
       --fg: hsl(200, 16%, 42%);
       --fg-dim: hsl(200, 16%, 32%);
+      --padding: 0.5em;
     }
+
     #container {
       font-size: var(--font-size);
       font-family: var(--font);
@@ -14,8 +16,10 @@ export const css = `
       flex-direction: row;
       flex-grow: 1;
     }
+
     #left {
       display: flex;
+      border-right: 3px solid var(--fg-dim);
     }
   
     #input {
@@ -27,11 +31,12 @@ export const css = `
       width: 100%;
       height: 100%;
       margin: 0;
-      padding: 0;
+      padding: var(--padding);
     }
     #input:focus {
       outline: none;
     }
+
     #right {
       flex-grow: 1;
       color: var(--fg-dim, gray);
@@ -40,6 +45,7 @@ export const css = `
     #output {
       white-space: nowrap;
       overflow: hidden;
+      padding: var(--padding);
     }
     #output .error {
       color: var(--red, red);

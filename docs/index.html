@@ -1,0 +1,37 @@
+<html>
+
+<head>
+  <title>repl-pad demo</title>
+</head>
+<script type="module" src="../dist/index.js"></script>
+
+<body>
+  <script type="module">
+    import {fromQuery} from '../dist/link.js';
+    const r = fromQuery(`pre`, `pad.html`);
+
+    for (const {el, uri} of r) {
+      const link = document.createElement(`a`);
+      link.href = uri;
+      link.innerText = `Edit`;
+      el.parentNode.insertBefore(link, el.nextSibling);
+    }
+  </script>
+  <h1>repl-pad demo</h1>
+  <p>Demonstrates taking some static HTML and decorating with repl-pad 'edit' links.</p>
+
+  <p>Example 1</p>
+  <pre>
+    const x = 1;
+    x;
+  </pre>
+
+  <p>Example 2</p>
+  <pre>
+    Math.random();
+  </pre>
+
+
+</body>
+
+</html>

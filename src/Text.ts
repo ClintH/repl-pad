@@ -11,6 +11,18 @@ export const between = (source: string, start: string, end?: string, lastEndMatc
 
 };
 
+export const countCharsFromStart = (source: string, ...chars: string[]): number => {
+  let counted = 0;
+  for (let i = 0; i < source.length; i++) {
+    if (chars.includes(source.charAt(i))) {
+      counted++;
+    } else {
+      break;
+    }
+  }
+  return counted;
+}
+
 /**
  * Returns _true_ if `source` starts and ends with `start` and `end`. Case-sensitive.
  * If _end_ is omitted, the the `start` value will be used.

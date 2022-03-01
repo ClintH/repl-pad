@@ -11,8 +11,8 @@
   ],
   "scripts": {
     "clean": "rimraf build dist",
-    "build": "tsup ./src/index.ts --format esm --sourcemap",
-    "dev": "tsup ./src/index.ts --format esm --sourcemap --watch",
+    "build": "tsup",
+    "dev": "tsup --sourcemap --watch",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

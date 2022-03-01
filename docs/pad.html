@@ -1,0 +1,56 @@
+<html>
+
+<head>
+  <title>repl host demo</title>
+</head>
+<script type="module" src="../dist/index.js"></script>
+
+<body>
+  <style>
+    :root {
+      --padding: 0.5em;
+      --dark: hsl(260, 10%, 10%);
+      --dark-fg: hsl(260, 10%, 60%);
+      --bg: hsl(260, 10%, 20%);
+      --fg: hsl(260, 10%, 80%);
+    }
+
+    html,
+    body {
+      height: 100vh;
+      padding: 0;
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--fg);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      padding: var(--padding);
+      background-color: var(--dark);
+      color: var(--dark-fg);
+
+    }
+
+    #container {
+      padding: var(--padding);
+      flex-grow: 1;
+    }
+
+    repl-pad {
+      display: flex;
+      height: 100%;
+    }
+  </style>
+  <nav>repl demo</nav>
+  <div id="container">
+    <repl-pad></repl-pad>
+
+  </div>
+</body>
+
+</html>

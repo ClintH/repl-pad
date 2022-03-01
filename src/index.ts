@@ -1,7 +1,7 @@
 
-import {between} from './Text';
-import {css} from './Style';
-import {debounce} from './Timer';
+import {between} from './text';
+import {css} from './style';
+import {debounce} from './timer';
 
 type BlockResult = {
   msg: string,
@@ -16,15 +16,15 @@ export class ReplPad extends HTMLElement {
 
   constructor(code: string = ``) {
     super();
-    this.code = code;
+    if (code.length === 0 && location.hash.length > 0) {
+      this.code = atob(location.hash.substring(1));
+    } else {
+      this.code = code;
+    }
     this.render();
     this.textEl?.focus();
-  }
 
-  static fromUri(): ReplPad {
-    const s = location.hash;
-    console.log(s);
-    return new ReplPad(atob(s.substring(1)));
+    setTimeout(() => this.codeChange(), 300);
   }
 
   formatValue(r: any): string {
@@ -182,12 +182,6 @@ export class ReplPad extends HTMLElement {
     location.hash = enc;
   }
 
-  private onRightMouseUp(evt: Event) {
-    //evt.preventDefault();
-    //evt.stopPropagation();
-    // this.shadowRoot.getElementById(`input`).focus();
-  }
-
   focus() {
     this.textEl?.focus();
   }
@@ -204,6 +198,7 @@ export class ReplPad extends HTMLElement {
     const textEl = document.createElement(`textarea`);
     textEl.spellcheck = false;
     textEl.id = `input`;
+    textEl.value = this.code;
     const codeChangeDebounced = debounce(() => {
       this.codeChange();
     }, 200);
@@ -226,24 +221,8 @@ export class ReplPad extends HTMLElement {
     const style = document.createElement('style');
     style.textContent = css;
 
-    // shadow.addEventListener(`keydown`, (evt) => {
-    //   if (evt.target === textEl) return;
-    //   textEl.focus();
-    // });
     shadow.appendChild(style);
     shadow.appendChild(container);
-
-    // <div @keyup="${this._onKeyDown}" @keydown="${this._onKeyDown}" id="container">
-    //   <div id="left">
-    //     <textarea spellcheck="false" @input="${this._codeChangeImpl}" id="input">${this.code}</textarea>
-    //   </div>
-    //   <div @mouseup="${this._onRightMouseUp}" id="right">
-    //     <div id="output">
-    //       Some output
-    //     </div>
-    //   </div>
-    // </div>
-
   }
 }
 customElements.define('repl-pad', ReplPad);
