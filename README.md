@@ -33,7 +33,7 @@ const x = 1;
 In your JS:
 
 ```js
-import {fromInnerText} from 'repl-pad';
+import {fromInnerText} from '@clinth/repl-pad';
 const el = document.getElementById(`eg1`);
 
 // Yields: pad.html#...
@@ -63,7 +63,7 @@ Eg, you have HTML with:
 And then in JS:
 
 ```js
-import {fromQuery} from 'repl-pad/link.js';
+import {fromQuery} from '@clinth/repl-pad/link.js';
 const r = fromQuery(`pre`, `pad.html`);
 
 for (const {el, uri} of r) {

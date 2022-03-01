@@ -1,10 +1,11 @@
 {
-  "name": "replpad",
+  "name": "@clinth/repl-pad",
   "version": "0.0.2",
   "description": "Javascript REPL",
   "main": "./dist/index.js",
   "type": "module",
   "module": "./dist/index.js",
+  "private": false,
   "repository": "https://github.com/clinth/replpad",
   "files": [
     "dist/"
