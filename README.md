@@ -2,7 +2,7 @@
 
 Repl-pad takes some Javascript and presents it in an editable REPL-like environment. It is meant for trying out simple function calls and seeing the result.
 
-_diag__
+![Screenshot](docs/ss-0.webp)
 
 Repl-pad gives the illusion that each line of code is executed independently, with the result shown to the side. But in reality, each line is executed along with every line that precedes it.
 
@@ -74,6 +74,8 @@ for (const {el, uri} of r) {
 }
 ```
 
+See this in action in `docs/index.html`.
+
 ## Programmatic
 
 It's also possible to send JS code programmatically:
@@ -85,9 +87,36 @@ const r = new ReplPad(`
 `);
 ```
 
-## Notes
 
-repl-pad is basic, breaking up provided code in a naive way. It can handle multi-line functions, arrow syntax and so on, but it's not too savvy. It should be using a proper parsing library.
+# Styling
 
-It could also use a pretty-printer, or a component like Monaco or ProseMirror.
+See `docs/pad.html` for an example.
 
+```
+repl-pad {
+  display: flex;
+  flex: 1;
+}
+
+CSS variables:
+
+```
+--mono-font: Font-family
+--ui-font: Font-family
+--padding: eg 0.5em
+```
+
+CSS variables - colours:
+
+```
+--ui-bg
+--ui-fg
+--ui-pinstripe
+--output
+--ui-highlight-bg
+--ui-highlight-fg
+--console-bg
+--console-fg
+--console-error
+--console-warn
+``` 
