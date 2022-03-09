@@ -25,6 +25,6 @@
     "rimraf": "^3.0.2",
     "split.js": "^1.6.5",
     "tsup": "^5.11.13",
-    "typescript": "^4.7.0-dev.20220227"
+    "typescript": "^4.6.2"
   }
 }

@@ -205,3 +205,18 @@ Or as attributes for the web component. Eg:
 
 `reevalConsole` (_true/false_. default _false_)
 * If true, statements starting with `console.` are re-evaluated.
+
+# Developing
+
+To work on repl-pad, run a live server and open `demo` in a browser. This links to `../dist/` to pick up the latest changes. [tsup](https://tsup.egoist.sh/) is used for building.
+
+Build to `./dist`:
+
+```
+npm run build
+```
+
+Continually recompile to `./dist`:
+```
+npm run dev
+```
