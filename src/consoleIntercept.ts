@@ -1,15 +1,20 @@
 export type MessageTypes = `log` | `info` | `warn` | `error` | `debug` | `dir` | `table` | `trace`;
 
-export type ConsoleListener = (type: MessageTypes, ...data: any[]) => void;
-
+export type ConsoleListener = {
+  log(type: MessageTypes, ...data: any[]): void
+  clear(): void
+}
+/**
+ * Returns a {@link ConsoleListener} that appends to a provided HTMLElement
+ * @param el Element to append to
+ * @returns ConsoleListener instance
+ */
 export const appendToElement = (el: HTMLElement): ConsoleListener => {
   if (el === null) throw new Error(`el param is null`);
   if (el === undefined) throw new Error(`el param is undefined`);
+  el.classList.add(`empty`);
 
-  return (type: MessageTypes, ...data: any[]) => {
-
-    //let msg = ``;
-    //JSON.stringify(data);
+  const log = (type: MessageTypes, ...data: any[]) => {
     const stringify = (v: any): string => {
       if (v === null) return `(null)`;
       if (v === undefined) return `(undef.)`;
@@ -20,7 +25,7 @@ export const appendToElement = (el: HTMLElement): ConsoleListener => {
           t += "&nbsp;" + key + ": " + value + ';<br />';
         }
         t += `}`;
-        return t;// JSON.stringify(v);
+        return t;
       }
       return v.toString();
     };
@@ -28,7 +33,20 @@ export const appendToElement = (el: HTMLElement): ConsoleListener => {
 
     el.innerHTML += `<div tabindex=0 class="log-${type}">${msg}</div>`;
     el.scrollTop = el.scrollHeight;
+    if (el.classList.contains(`empty`)) {
+      el.classList.remove(`empty`);
+      el.dispatchEvent(new Event(`non-empty`));
+
+    }
   };
+
+  const clear = () => {
+    el.innerHTML = ``;
+    el.classList.add(`empty`);
+    el.dispatchEvent(new Event(`empty`));
+  }
+
+  return {log, clear};
 }
 
 export class ConsoleIntercept implements Console {
@@ -52,7 +70,7 @@ export class ConsoleIntercept implements Console {
     this.listeners = [];
   }
 
-  static init(listener: ConsoleListener): void {
+  static init(listener: ConsoleListener): ConsoleIntercept {
     let cl: ConsoleIntercept;
     if (`onMessage` in console) {
       // Assume it is an instance
@@ -61,12 +79,13 @@ export class ConsoleIntercept implements Console {
       cl = new ConsoleIntercept();
     }
     cl.addListener(listener);
+    return cl;
   }
 
   onMessage(type: MessageTypes, ...data: any[]) {
     try {
       this.listeners.forEach(l => {
-        l(type, ...data);
+        l.log(type, ...data);
       })
     } catch (ex) {
       this.orig.error(ex);
@@ -82,6 +101,13 @@ export class ConsoleIntercept implements Console {
   }
 
   clear(): void {
+    try {
+      this.listeners.forEach(l => {
+        l.clear();
+      })
+    } catch (ex) {
+      this.orig.error(ex);
+    }
     this.orig.clear();
   }
 

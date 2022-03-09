@@ -15,8 +15,10 @@ export const css = `
       --console-fg: black;
       --console-error: red;
       --console-warn: hsl(50, 100%, 50%);
+      
       box-sizing: border-box;
     }
+
 
     #container {
       font-size: var(--font-size);
@@ -118,6 +120,20 @@ export const css = `
       justify-content: flex-end;
       background-color: var(--ui-bg);
       color: var(--ui-fg);
+    }
+
+    #toolbar>div {
+      padding: 0.5em;
+      background-color: var(--ui-bg);
+      color: var(--ui-fg);
+      cursor:default;
+      opacity: 0.8;
+      position: fixed;
+      z-index: 2;
+    }
+
+    #toolbar>div:hover {
+      opacity: 1;
     }
 
     #output {

@@ -1,5 +1,4 @@
 import Split from 'split.js';
-
 import {css} from './style';
 import {debounce} from './timer';
 import {execute, ExecutionResult, parse, ReplOptions, resolveImports} from './parse';
@@ -36,6 +35,8 @@ export class ReplPadElement extends HTMLElement {
       }
       return prev;
     }
+
+    // Apply options from attribute
     opts.reevalConsole = attribToBool(`reevalConsole`, opts.reevalConsole);
     opts.reevalUndef = attribToBool(`reevalUndef`, opts.reevalUndef);
 
@@ -49,6 +50,8 @@ export class ReplPadElement extends HTMLElement {
     opts.reevalUndef = paramToBool(params.get('reevalUndef'), opts.reevalUndef);
 
     this.replOptions = opts;
+
+    // Handle initial code
     setTimeout(() => this.codeChange(), this.codeEditDebounceMs);
   }
 
@@ -83,8 +86,8 @@ export class ReplPadElement extends HTMLElement {
     if (output !== undefined) output.innerHTML = resultsHtml.join('\n');
 
     let enc = btoa(txt.value);
-    //location.hash = enc;
-    window.location.replace(`#${enc}`)
+    //location.hash = enc;  // Back button acts as an undo stack
+    window.location.replace(`#${enc}`); // Back button will returns to referer page
   }
 
   focus() {
@@ -130,15 +133,17 @@ export class ReplPadElement extends HTMLElement {
     const consoleEl = document.createElement(`div`);
     consoleEl.id = `console`;
 
+
     ConsoleIntercept.init(appendToElement(consoleEl));
 
     const bottomToolbar = document.createElement(`div`);
     bottomToolbar.id = `toolbar`;
 
-    const btnClear = document.createElement(`button`);
-    btnClear.innerText = `Clear`;
+    const btnClear = document.createElement(`div`);
+    btnClear.innerText = `C`
+    btnClear.title = `Clear console`;
     btnClear.addEventListener(`click`, () => {
-      consoleEl.innerHTML = ``;
+      console.clear();
     });
 
     bottomToolbar.appendChild(btnClear);
@@ -159,19 +164,39 @@ export class ReplPadElement extends HTMLElement {
     shadow.appendChild(container);
 
     const splitLeftRight = Split([left, right], {
-      sizes: [25, 75]
+      sizes: [75, 25],
+      gutterSize: 20
     });
 
+    let lastBottomSize = 0;
     const splitTopBottom = Split([top, bottom], {
       sizes: [100, 0],
       minSize: [100, 0],
+      gutterSize: 20,
       direction: `vertical`,
-      onDrag: (sizes) => {
+      onDragEnd: (sizes) => {
         const bottomSize = sizes[1];
         consoleEl.style.display = bottomSize > 1 ? `block` : `none`;
-      },
+        lastBottomSize = bottomSize;
+      }
     });
     splitTopBottom.collapse(1);
+
+
+    consoleEl.addEventListener(`empty`, () => {
+      splitTopBottom.collapse(1);
+    });
+
+    consoleEl.addEventListener(`non-empty`, () => {
+      const sizes = splitTopBottom.getSizes();
+
+      // Pop-up console if it's tiny
+      if (sizes[1] < 1) {
+        let bottomSize = Math.max(lastBottomSize, 20);
+        splitTopBottom.setSizes([100 - bottomSize, bottomSize]);
+        lastBottomSize = bottomSize;
+      }
+    })
   }
 }
 customElements.define('repl-pad', ReplPadElement);

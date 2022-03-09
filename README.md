@@ -208,7 +208,7 @@ Or as attributes for the web component. Eg:
 
 # Developing
 
-To work on repl-pad, run a live server and open `demo` in a browser. This links to `../dist/` to pick up the latest changes. [tsup](https://tsup.egoist.sh/) is used for building.
+To work on repl-pad, run a live server and open `docs` in a browser. [tsup](https://tsup.egoist.sh/) is used for building.
 
 Build to `./dist`:
 
@@ -216,7 +216,7 @@ Build to `./dist`:
 npm run build
 ```
 
-Continually recompile to `./dist`:
+Continually recompile to `./dist`, copying files to `docs/dist`:
 ```
 npm run dev
 ```

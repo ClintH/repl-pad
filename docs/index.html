@@ -1,18 +1,30 @@
 <html>
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>repl-pad demo</title>
 </head>
-<script type="module" src="https://unpkg.com/@clinth/repl-pad@latest/dist/index.js"></script>
+<script type="module" src="./dist/index.js"></script>
 <style>
   html {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  pre {
+    color: gray;
+    font-size: 0.8em;
+    font-family: 'Rec Mono SemiCasual', 'VictorMono NF', 'Cascadia Code', 'Consolas', SFMono-Regular, Menlo, Monaco, 'Liberation Mono', 'Courier New', monospace;
   }
 </style>
 
 <body>
   <script type="module">
-    import {fromQuery} from 'https://unpkg.com/@clinth/repl-pad@latest/dist/link.js';
+    import {fromQuery} from './dist/link.js';
     const r = fromQuery(`pre`, `pad.html`);
 
     for (const {el, uri} of r) {
@@ -30,57 +42,57 @@
 
     <p>Example 1 - Simple</p>
     <pre>
-    const x = 1;
-    x;
+const x = 1;
+x;
   </pre>
 
     <p>Example 2 - Loops and timeout</p>
     <pre>
-    Math.random();
-    const x = Math.random();
-    for (let i=0;i<10;i++) {
-      i;
-    }
+Math.random();
+const x = Math.random();
+for (let i=0;i<10;i++) {
+  i;
+}
 
-    const fn = (x) => x * 2;
+const fn = (x) => x * 2;
 
-    setTimeout(() => {
-      console.log(`result: ${fn(10)}`);
-    }, 5000);
-  </pre>
+setTimeout(() => {
+  console.log(`result: ${fn(10)}`);
+}, 5000);
+</pre>
 
 
     <p>Example 3 - Import</p>
     <pre>
-    import {Normalise} from 'https://unpkg.com/ixfx/dist/temporal.js';
+import {Normalise} from 'https://unpkg.com/ixfx/dist/temporal.js';
 
-    // Initialise a streaming normaliser
-    const n = Normalise.stream();
+// Initialise a streaming normaliser
+const n = Normalise.stream();
 
-    // Yields 1, because 5 is the highest seen
-    n(5);
+// Yields 1, because 5 is the highest seen
+n(5);
 
-    // Yields 1, because now 10 is the highest seen
-    n(10);
+// Yields 1, because now 10 is the highest seen
+n(10);
 
-    // Yields 0, because it's so far the lowest seen
-    n(5);
+// Yields 0, because it's so far the lowest seen
+n(5);
 
-    // Yields 0.5, becaause it's in the middle of the range seen thus far
-    n(7.5);
+// Yields 0.5, becaause it's in the middle of the range seen thus far
+n(7.5);
 
-    // Yields 1, because now it's the largest seen
-    n(11);
+// Yields 1, because now it's the largest seen
+n(11);
   </pre>
 
     <p>Example 4 - Fault tolerance</p>
     <pre>
-    let x = 0;
-    const fn = () => x++;
-    fn();
-    some-error
-    fn();
-    fn();
+let x = 0;
+const fn = () => x++;
+fn();
+some-error
+fn();
+fn();
   </pre>
   </main>
 </body>
