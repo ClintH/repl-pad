@@ -73,6 +73,10 @@ export class ConsoleIntercept implements Console {
     }
   }
 
+  logRaw(...data: any[]): void {
+    this.orig.log(...data);
+  }
+
   assert(condition?: boolean, ...data: any[]): void {
     this.orig.assert(condition, ...data);
   }

@@ -7,8 +7,8 @@ export type Import = {
 }
 export type ExecutionBlock = {
   statement: string
-  preamble: string[]
   span: LineSpan
+  cumulative: boolean
 }
 
 export type ExecutionState = `` | `error` | `info`;
@@ -24,7 +24,12 @@ export type ParseResult = {
   blocks: ExecutionBlock[]
 }
 
-export const parse = (source: string): ParseResult => {
+export type ReplOptions = {
+  reevalConsole: boolean
+  reevalUndef: boolean
+}
+
+export const parse = (source: string, opts: ReplOptions): ParseResult => {
   const ranges = splitRanges(source, '\n');
   const src = ts.createSourceFile(
     `s.ts`,
@@ -34,7 +39,6 @@ export const parse = (source: string): ParseResult => {
     ts.ScriptKind.JS);
 
   const blocks: ExecutionBlock[] = [];
-  const preamble = [];
   const imports = new Map<string, Import>();
 
   //console.log(ranges);
@@ -44,14 +48,13 @@ export const parse = (source: string): ParseResult => {
     const span = lineSpan(ranges, sStart, s.end);
     const block = {
       statement: s.getText(),
-      preamble: [...preamble],
+      cumulative: true,
       span
     };
     let addBlock = true;
 
     if (s.kind === ts.SyntaxKind.VariableStatement) {
       // eg. let x = 1;
-      preamble.push(s.getText());
       const varDeclaration = s as ts.VariableStatement;
       for (const vd of varDeclaration.declarationList.declarations) {
         if (`escapedText` in vd.name) {
@@ -63,7 +66,13 @@ export const parse = (source: string): ParseResult => {
       // eg. Math.random();
       // Shouldn't be needed to push expressions if everything was purely functional,
       // but...
-      preamble.push(s.getText());
+      // block.cumulative = false
+      //console.log(s);
+      const exprS = s as ts.ExpressionStatement;
+      //console.log(exprS.expression.getText(src));
+      if (!opts.reevalConsole && block.statement.startsWith(`console.`)) {
+        block.cumulative = false;
+      }
     } else if (s.kind === ts.SyntaxKind.ImportDeclaration) {
       const importS = s as ts.ImportDeclaration;
       const bindings = importS.importClause?.namedBindings as ts.NamedImportBindings;
@@ -89,7 +98,7 @@ export const parse = (source: string): ParseResult => {
         console.warn(s);
       }
     } else {
-      console.warn(s);
+      //console.warn(s);
     }
 
     if (addBlock) blocks.push(block);
@@ -129,8 +138,8 @@ export async function resolveImports(imports: Map<string, Import>) {
   return resolved;
 }
 
-export async function execute(b: ExecutionBlock, context: any): Promise<ExecutionResult> {
-  const code = b.preamble.join(';\n') + b.statement;
+export async function execute(b: ExecutionBlock, context: any, prepend: string, opts: ReplOptions): Promise<ExecutionResult> {
+  const code = prepend + b.statement;
   //console.log(`eval: ${code} with context: ${JSON.stringify(context)}`);
   const r = function (src: string) {
     return eval(src);
@@ -141,6 +150,8 @@ export async function execute(b: ExecutionBlock, context: any): Promise<Executio
       const result = r.bind(context)(code);
       const formatted = formatValue(result);
       const er: ExecutionResult = {msg: formatted[0], details: formatted[1], keep: true, state: formatted[2]};
+
+      if (result === undefined && !opts.reevalUndef) er.keep = false;
       resolve(er);
     } catch (ex: unknown) {
       if (ex instanceof Error) {
@@ -150,7 +161,6 @@ export async function execute(b: ExecutionBlock, context: any): Promise<Executio
         const er: ExecutionResult = {msg: (ex as any).toString(), details: ex as string, state: `error`, keep: false};
         resolve(er);
       }
-
     }
   });
 }
@@ -161,11 +171,11 @@ const formatValue = (r: any): [string, string, ExecutionState] => {
   let state: ExecutionState = ``;
   const t = typeof r;
   if (r === undefined) {
-    msg = `(undef.)`;
+    msg = `undefined`;
     state = `info`;
   }
   else if (r === null) {
-    msg = `(null)`;
+    msg = `null`;
     state = `info`;
   }
   else if (t === `number`) {

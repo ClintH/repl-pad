@@ -2,7 +2,7 @@ import Split from 'split.js';
 
 import {css} from './style';
 import {debounce} from './timer';
-import {execute, ExecutionResult, parse, resolveImports} from './parse';
+import {execute, ExecutionResult, parse, ReplOptions, resolveImports} from './parse';
 import {appendToElement, ConsoleIntercept} from './consoleIntercept';
 
 export class ReplPadElement extends HTMLElement {
@@ -10,6 +10,7 @@ export class ReplPadElement extends HTMLElement {
   outputEl: HTMLElement | undefined;
   textEl: HTMLTextAreaElement | undefined;
   codeEditDebounceMs = 400;
+  replOptions: ReplOptions;
 
   constructor(code: string = ``) {
     super();
@@ -21,6 +22,33 @@ export class ReplPadElement extends HTMLElement {
     this.render();
     this.textEl?.focus();
 
+    const opts = {
+      reevalConsole: false,
+      reevalUndef: true
+    };
+
+    const attribToBool = (name: string, prev: boolean): boolean => {
+      name = name.toLocaleLowerCase();
+      if (this.hasAttribute(name)) {
+        const v = this.getAttribute(name);
+        if (v === `false`) return false;
+        else if (v === `true` || v === ``) return true;
+      }
+      return prev;
+    }
+    opts.reevalConsole = attribToBool(`reevalConsole`, opts.reevalConsole);
+    opts.reevalUndef = attribToBool(`reevalUndef`, opts.reevalUndef);
+
+    // Apply options from URI
+    const paramToBool = (p: string | null, prev: boolean): boolean => {
+      if (p === null || p === undefined) return prev;
+      return p === `true`;
+    }
+    const params = new URLSearchParams(window.location.search);
+    opts.reevalConsole = paramToBool(params.get('reevalConsole'), opts.reevalConsole);
+    opts.reevalUndef = paramToBool(params.get('reevalUndef'), opts.reevalUndef);
+
+    this.replOptions = opts;
     setTimeout(() => this.codeChange(), this.codeEditDebounceMs);
   }
 
@@ -30,11 +58,11 @@ export class ReplPadElement extends HTMLElement {
 
     if (txt === undefined) return;
 
-    const p = parse(txt.value);
+    const p = parse(txt.value, this.replOptions);
     const results: ExecutionResult[] = [];
     let lines = 0;
     const context = await resolveImports(p.imports);
-
+    let prepend = ``;
     for (const b of p.blocks) {
       //console.log(b.statement + ' start: ' + b.span.start);
       while (lines < b.span.start) {
@@ -42,9 +70,13 @@ export class ReplPadElement extends HTMLElement {
         lines++;
       }
 
-      const result = await execute(b, context);
+      const result = await execute(b, context, prepend, this.replOptions);
       results.push(result);
       lines++;
+      if (result.keep && b.cumulative) {
+        prepend += b.statement;
+        if (!prepend.endsWith(';')) prepend += ';';
+      }
     }
 
     const resultsHtml = results.map(b => `<div title="${b.details}" class="${b.state}">${b.msg}</div>`)

@@ -1,28 +1,25 @@
 export const css = `
     :host {
-      // --blue: hsl(212, 100%, 50%);
-      // --red: hsl(351, 100%, 50%);
+      --mono-font: 'Rec Mono SemiCasual', 'VictorMono NF', 'Consolas', SFMono-Regular, Menlo, Monaco, 'Liberation Mono', 'Courier New', monospace;
       --ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-      --mono-font: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;);
       --font-size: 1em;
-      // --fg: hsl(200, 16%, 42%);
-      // --fg-dim: hsl(200, 16%, 32%);
       --padding: 0.5em;
-      --output: yellow;
+      --output: gray;
       --ui-pinstripe: whitesmoke;
       --ui-highlight-bg: yellow;
       --ui-highlight-fg: black;
+      --ui-bg: hsl(0, 0%, 80%);
+      --ui-fg: hsl(0, 0%, 90%);
       --line-height: 1.4em;
-      --console-bg: black;
-      --console-fg: white;
+      --console-bg: hsl(0, 0%, 95%);
+      --console-fg: black;
       --console-error: red;
-      --console-warn: yellow;
+      --console-warn: hsl(50, 100%, 50%);
       box-sizing: border-box;
     }
 
     #container {
       font-size: var(--font-size);
-      font-family: var(--mono-font);
       line-height: var(--line-height);
       display: flex;
       flex-direction: column;
@@ -45,12 +42,13 @@ export const css = `
       flex-direction: column;
       font-size: 0.8em;
       line-height: 1.4em;
+      font-family: var(--mono-font);
+
     }
 
     #console {
       flex-grow: 1;
       overflow-y: auto;
-      // display:none;
       box-sizing: border-box;
       background-color: var(--console-bg);
       color: var(--console-fg);
@@ -94,7 +92,7 @@ export const css = `
       background-color: transparent;
       color: inherit;
       border: 0;
-      font-family: var(--font-family);
+      font-family: var(--mono-font);
       font-size: var(--font-size);
       line-height: var(--line-height);
       width: 100%;
@@ -110,6 +108,7 @@ export const css = `
 
     #right {
       flex-grow: 1;
+      font-family: var(--mono-font);
       color: var(--output, gray);
     }
 
@@ -126,6 +125,7 @@ export const css = `
       overflow: hidden;
       padding: var(--padding);
     }
+
     #output .error {
       color: var(--console-error, red);
     }

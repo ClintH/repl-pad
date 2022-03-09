@@ -1,34 +1,33 @@
 <html>
 
 <head>
-  <title>repl host demo</title>
+  <title>repl-pad host demo</title>
 </head>
 <script type="module" src="../dist/index.js"></script>
 
 <body>
+  <!--
+    See 'plain.html' for demo without theming.
+  -->
   <style>
     :root {
       --base-hue: 352;
+      --mono-font-family: 'Rec Mono SemiCasual', 'VictorMono NF', 'Cascadia Code', 'Consolas', SFMono-Regular, Menlo, Monaco, 'Liberation Mono', 'Courier New', monospace;
+      --ui-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       --pad: 0.5em;
-      --dark: hsl(260, 10%, 10%);
-      --dark-fg: hsl(260, 10%, 60%);
-      --bg: hsl(260, 10%, 20%);
-      --fg: hsl(260, 10%, 80%);
 
-      --output-color: purple;
-      --ui-bg-colour: red;
-      --ui-fg-colour: white;
-      --ui-pinstripe-colour: hsl(var(--base-hue), 70%, 15%);
+      --output-color: hsl(var(--base-hue), 19%, 60%);
+      --bg-colour: hsl(var(--base-hue), 59%, 90%);
+      --fg-colour: hsl(var(--base-hue), 9%, 8%);
+      --console-bg-colour: hsl(var(--base-hue), 19%, 70%);
+      --console-fg-colour: hsl(var(--base-hue), 9%, 8%);
+      --console-error-colour: hsla(0, 100%, 40%, 80%);
+      --console-warn-colour: yellow;
+      --ui-bg-colour: hsl(var(--base-hue), 59%, 70%);
+      --ui-fg-colour: hsl(var(--base-hue), 9%, 8%);
+      --ui-pinstripe-colour: hsl(var(--base-hue), 70%, 89%);
       --ui-highlight-bg-colour: hsl(var(--base-hue), 70%, 90%);
       --ui-highlight-fg-colour: hsl(var(--base-hue), 10%, 0%);
-      --bg-colour: white;
-      --fg-colour: black;
-      --console-bg-colour: black;
-      --console-fg-colour: white;
-      --console-error-colour: red;
-      --console-warn-colour: yellow;
-      --mono-font-family: 'Rec Mono SemiCasual', 'VictorMono NF', 'Consolas', SFMono-Regular, Menlo, Monaco, 'Liberation Mono', 'Courier New', monospace;
-      --ui-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     }
 
     @media (prefers-color-scheme: dark) {
@@ -45,7 +44,6 @@
         --ui-pinstripe-colour: hsl(var(--base-hue), 90%, 8%);
         --ui-highlight-bg-colour: hsl(var(--base-hue), 70%, 90%);
         --ui-highlight-fg-colour: hsl(var(--base-hue), 10%, 0%);
-
       }
     }
 
@@ -95,10 +93,9 @@
       --console-warn: var(--console-warn-colour);
     }
   </style>
-  <nav>repl demo</nav>
+  <nav>repl-pad demo</nav>
   <div id="container">
     <repl-pad></repl-pad>
-
   </div>
 </body>
 
