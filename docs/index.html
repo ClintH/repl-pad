@@ -107,6 +107,19 @@ for await (const r of randomGenerator) {
 }
 console.log(`After`); 
   </pre>
+
+    <p>Example 6 - Alt import</p>
+    <pre>
+import * as Generators from "https://unpkg.com/ixfx/dist/generators.js"
+
+// Yields the array: [0,1,2,3,4]
+const a = [...Generators.count(5)];
+
+for (let i of Generators.count(5)) {
+  // Loop runs five times, with i being 0, 1, 2, 3 and then 4
+  console.log(i);
+}
+  </pre>
   </main>
 </body>
 
