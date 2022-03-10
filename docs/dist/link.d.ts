@@ -11,6 +11,13 @@
  * @returns String
  */
 declare const fromInnerText: (dom: HTMLElement, baseUri?: string) => string;
+/**
+ * Returns a URI for source contained in a string
+ * @param src
+ * @param baseUri
+ * @returns
+ */
+declare const fromText: (src: string, baseUri?: string) => string;
 declare type Result = {
     el: HTMLElement;
     uri: string;
@@ -32,4 +39,4 @@ declare type Result = {
  */
 declare const fromQuery: (q: string, baseUri?: string) => ReadonlyArray<Result>;
 
-export { Result, fromInnerText, fromQuery };
+export { Result, fromInnerText, fromQuery, fromText };

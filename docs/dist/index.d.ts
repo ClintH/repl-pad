@@ -1,6 +1,7 @@
 declare type ReplOptions = {
     reevalConsole: boolean;
     reevalUndef: boolean;
+    wrapAsync: boolean;
 };
 
 declare class ReplPadElement extends HTMLElement {

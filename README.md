@@ -2,7 +2,7 @@
 
 Repl-pad takes some Javascript and presents it in an editable REPL-like environment. It is meant for easily making example snippets runnable and editable. [Online demo](https://clinth.github.io/repl-pad/)
 
-From this, in your HTML:
+From this code snippet in your HTML:
 ```html
 <pre>
   Math.random();
@@ -19,7 +19,7 @@ From this, in your HTML:
 </pre>
 ```
 
-To this repl-pad, with the source magically pulled from the HTML:
+You can produce this repl-pad, with the source magically pulled from the HTML:
 
 ![Screenshot](docs/ss-1.webp)
 
@@ -38,6 +38,44 @@ URL-based imports can be used as well:
 Console messages are intercepted and displayed in a mini-console at the bottom of the viewport. This makes it more useful on tablet and mobile devices that lack access to DevTools.
 
 ![Screenshot](docs/ss-3.webp)
+
+# Caveats
+
+Under the hood, `eval` is used, limiting the use of `async`/`await`.
+
+`for await ... of` and `async` functions are handled by wrapping the whole snippet in this [immediately-invoked function expression](https://developer.mozilla.org/en-US/docs/Glossary/IIFE). This allows code to run, but not necessarily with the same behaviour as you'd expect.
+
+## Examples
+
+Before:
+
+```
+for await (...) { ... }
+```
+
+After:
+```
+(async () => { for await (..) { ... } })()
+```
+
+Before:
+```
+async function hello() {
+  console.log(`hello?`);
+}
+hello();
+```
+
+After:
+```
+(async () => {
+  async function hello() {
+    let x = 1;
+  console.log(`hello?`);
+  }
+  hello();
+});
+```
 
 # Usage
 

@@ -21,9 +21,10 @@ export class ReplPadElement extends HTMLElement {
     this.render();
     this.textEl?.focus();
 
-    const opts = {
+    const opts: ReplOptions = {
       reevalConsole: false,
-      reevalUndef: true
+      reevalUndef: true,
+      wrapAsync: false
     };
 
     const attribToBool = (name: string, prev: boolean): boolean => {
@@ -66,6 +67,11 @@ export class ReplPadElement extends HTMLElement {
     let lines = 0;
     const context = await resolveImports(p.imports);
     let prepend = ``;
+
+    const containsAsync = p.blocks.some(b => b.wrapAsync === true);
+    const opts = {...this.replOptions};
+    opts.wrapAsync = containsAsync;
+
     for (const b of p.blocks) {
       //console.log(b.statement + ' start: ' + b.span.start);
       while (lines < b.span.start) {
@@ -73,7 +79,7 @@ export class ReplPadElement extends HTMLElement {
         lines++;
       }
 
-      const result = await execute(b, context, prepend, this.replOptions);
+      const result = await execute(b, context, prepend, opts);
       results.push(result);
       lines++;
       if (result.keep && b.cumulative) {
@@ -114,6 +120,20 @@ export class ReplPadElement extends HTMLElement {
     textEl.setAttribute(`wrap`, `off`);
     textEl.id = `input`;
     textEl.value = this.code;
+
+    textEl.addEventListener(`keydown`, (evt) => {
+      // TODO: shift+tab remove indent
+      // TODO: indent whole selection
+      if (evt.code === "Tab") {
+        const s = textEl.selectionStart;
+        const e = textEl.selectionEnd;
+        const v = textEl.value;
+        textEl.value = v.substring(0, s) + '  ' + v.substring(e);
+        textEl.selectionStart = textEl.selectionEnd = s + 2;
+        evt.preventDefault();
+      }
+    }, false);
+
     const codeChangeDebounced = debounce(() => {
       this.codeChange();
     }, this.codeEditDebounceMs);

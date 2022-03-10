@@ -16,7 +16,16 @@ export const fromInnerText = (dom: HTMLElement, baseUri: string = ''): string =>
   if (dom === null) throw new Error(`dom parameter is null`);
   if (dom === undefined) throw new Error(`dom parameter is undefined`);
   let src = dom.innerText;
+  return fromText(src, baseUri);
+}
 
+/**
+ * Returns a URI for source contained in a string
+ * @param src
+ * @param baseUri 
+ * @returns 
+ */
+export const fromText = (src: string, baseUri: string = ''): string => {
   // Check for consistent indents
   let lines = src.split('\n');
   let spacing = Number.MAX_SAFE_INTEGER;

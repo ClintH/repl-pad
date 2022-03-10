@@ -1,6 +1,6 @@
 import {
   countCharsFromStart
-} from "./chunk-5MYXZ2DM.js";
+} from "./chunk-RPFPAI5T.js";
 
 // src/link.ts
 var fromInnerText = (dom, baseUri = "") => {
@@ -9,6 +9,9 @@ var fromInnerText = (dom, baseUri = "") => {
   if (dom === void 0)
     throw new Error(`dom parameter is undefined`);
   let src = dom.innerText;
+  return fromText(src, baseUri);
+};
+var fromText = (src, baseUri = "") => {
   let lines = src.split("\n");
   let spacing = Number.MAX_SAFE_INTEGER;
   lines.forEach((l) => {
@@ -32,6 +35,6 @@ var fromQuery = (q, baseUri = "") => {
 };
 export {
   fromInnerText,
-  fromQuery
+  fromQuery,
+  fromText
 };
-//# sourceMappingURL=link.js.map

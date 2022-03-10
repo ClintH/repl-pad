@@ -2,7 +2,6 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>repl-pad demo</title>
 </head>
 <script type="module" src="./dist/index.js"></script>
@@ -93,6 +92,20 @@ fn();
 some-error
 fn();
 fn();
+  </pre>
+
+    <p>Example 5 - Async</p>
+    <pre>
+import { interval } from "https://unpkg.com/ixfx/dist/flow.js"
+console.log(`Before`);
+let loops = 0;
+const randomGenerator = interval(() => Math.random(), 1000);
+for await (const r of randomGenerator) {
+  // Prints a new random number every second
+  console.log(r);
+  if (++loops > 10) break;
+}
+console.log(`After`); 
   </pre>
   </main>
 </body>

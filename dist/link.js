@@ -9,6 +9,9 @@ var fromInnerText = (dom, baseUri = "") => {
   if (dom === void 0)
     throw new Error(`dom parameter is undefined`);
   let src = dom.innerText;
+  return fromText(src, baseUri);
+};
+var fromText = (src, baseUri = "") => {
   let lines = src.split("\n");
   let spacing = Number.MAX_SAFE_INTEGER;
   lines.forEach((l) => {
@@ -32,5 +35,6 @@ var fromQuery = (q, baseUri = "") => {
 };
 export {
   fromInnerText,
-  fromQuery
+  fromQuery,
+  fromText
 };

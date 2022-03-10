@@ -9,6 +9,7 @@ export type ExecutionBlock = {
   statement: string
   span: LineSpan
   cumulative: boolean
+  wrapAsync: boolean
 }
 
 export type ExecutionState = `` | `error` | `info`;
@@ -27,6 +28,7 @@ export type ParseResult = {
 export type ReplOptions = {
   reevalConsole: boolean
   reevalUndef: boolean
+  wrapAsync: boolean
 }
 
 export const parse = (source: string, opts: ReplOptions): ParseResult => {
@@ -44,13 +46,16 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
   //console.log(ranges);
   for (const s of src.statements) {
     const sStart = s.getStart(src);
-    //  console.log(`statement: ${s.getText()} kind: ${s.kind} start: ${sStart} end: ${s.end}`);
+    //console.log(`statement: ${s.getText()} kind: ${s.kind} start: ${sStart} end: ${s.end}`);
     const span = lineSpan(ranges, sStart, s.end);
-    const block = {
+    const block: ExecutionBlock = {
       statement: s.getText(),
       cumulative: true,
-      span
+      span,
+      wrapAsync: false
     };
+
+    // By default, add the block
     let addBlock = true;
 
     if (s.kind === ts.SyntaxKind.VariableStatement) {
@@ -61,7 +66,17 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
           block.statement += ';' + vd.name.escapedText;
         }
       }
-
+    } else if (s.kind === ts.SyntaxKind.FunctionDeclaration) {
+      const funcDecl = s as ts.FunctionDeclaration;
+      if (funcDecl.modifiers !== undefined) {
+        for (const m of funcDecl.modifiers) {
+          if (m.kind === ts.SyntaxKind.AsyncKeyword) {
+            block.wrapAsync = true;
+          }
+        }
+      }
+    } else if (s.kind == ts.SyntaxKind.ForOfStatement) {
+      block.wrapAsync = (`awaitModifier` in s);
     } else if (s.kind === ts.SyntaxKind.ExpressionStatement) {
       // eg. Math.random();
       // Shouldn't be needed to push expressions if everything was purely functional,
@@ -139,7 +154,11 @@ export async function resolveImports(imports: Map<string, Import>) {
 }
 
 export async function execute(b: ExecutionBlock, context: any, prepend: string, opts: ReplOptions): Promise<ExecutionResult> {
-  const code = prepend + b.statement;
+  let code = prepend + b.statement;
+  if (opts.wrapAsync) {
+    code = `(async () => {${code}})()`;
+  }
+
   //console.log(`eval: ${code} with context: ${JSON.stringify(context)}`);
   const r = function (src: string) {
     return eval(src);
