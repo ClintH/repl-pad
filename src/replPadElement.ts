@@ -1,8 +1,10 @@
 import Split from 'split.js';
 import {css} from './style';
 import {debounce} from './timer';
-import {execute, ExecutionResult, parse, ReplOptions, resolveImports} from './parse';
+import {parse} from './parse';
 import {appendToElement, ConsoleIntercept} from './consoleIntercept';
+import {resolveImports, execute} from './execute';
+import {ReplOptions, ExecutionResult} from './types';
 
 export class ReplPadElement extends HTMLElement {
   code: string;
@@ -65,7 +67,7 @@ export class ReplPadElement extends HTMLElement {
     const p = parse(txt.value, this.replOptions);
     const results: ExecutionResult[] = [];
     let lines = 0;
-    const context = await resolveImports(p.imports);
+    let context = {}
     let prepend = ``;
 
     const containsAsync = p.blocks.some(b => b.wrapAsync === true);
@@ -73,19 +75,31 @@ export class ReplPadElement extends HTMLElement {
     opts.wrapAsync = containsAsync;
 
     for (const b of p.blocks) {
-      //console.log(b.statement + ' start: ' + b.span.start);
+      //console.log(b.statement + ' start: ' + b.span.start + ' kind: ' + b.kind);
       while (lines < b.span.start) {
         results.push({msg: `&nbsp;`, state: ``, details: ``, keep: true});
         lines++;
       }
 
-      const result = await execute(b, context, prepend, opts);
+      let result: ExecutionResult = {msg: ``, state: `info`, keep: false, details: ``};
+      if (b.kind === `import` && b.imports) {
+        const importResult = await resolveImports(b.imports);
+        if (importResult.errors.length > 0) {
+          result = {msg: importResult.errors, state: 'error', keep: false, details: ``};
+        } else {
+          context = {...context, ...importResult.resolved};
+        }
+      } else if (b.kind === `run`) {
+        result = await execute(b, context, prepend, opts);
+      }
+
       results.push(result);
       lines++;
       if (result.keep && b.cumulative) {
         prepend += b.statement;
         if (!prepend.endsWith(';')) prepend += ';';
       }
+
     }
 
     const resultsHtml = results.map(b => `<div title="${b.details}" class="${b.state}">${b.msg}</div>`)

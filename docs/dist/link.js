@@ -1,6 +1,6 @@
 import {
   countCharsFromStart
-} from "./chunk-RPFPAI5T.js";
+} from "./chunk-5MYXZ2DM.js";
 
 // src/link.ts
 var fromInnerText = (dom, baseUri = "") => {
@@ -38,3 +38,4 @@ export {
   fromQuery,
   fromText
 };
+//# sourceMappingURL=link.js.map

@@ -120,6 +120,19 @@ for (let i of Generators.count(5)) {
   console.log(i);
 }
   </pre>
+
+    <p>Example 7 - Loop</p>
+    <pre>
+import {shuffle} from 'https://unpkg.com/ixfx/dist/arrays.js';
+const a = [`apples`, `oranges`, `melons`, `bananas`];
+// Yields a randomly ordered version, eg: [`melons`,`apples`,`bananas`,`oranges`];
+const b = shuffle(a);
+
+const items = [1,2,3,4,5,6,7,8,9,10];
+for (const i of shuffle(items)) {
+  console.log(i);
+}
+  </pre>
   </main>
 </body>
 

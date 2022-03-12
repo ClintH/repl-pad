@@ -1,35 +1,7 @@
 import * as ts from 'typescript';
-import {LineSpan, lineSpan, splitRanges, unwrap} from './text';
+import {lineSpan, splitRanges} from './text';
+import {ExecutionBlock, Import, ParseResult, ReplOptions} from './types';
 
-export type Import = {
-  module: string
-  named: boolean
-}
-export type ExecutionBlock = {
-  statement: string
-  span: LineSpan
-  cumulative: boolean
-  wrapAsync: boolean
-}
-
-export type ExecutionState = `` | `error` | `info`;
-export type ExecutionResult = {
-  msg: string
-  state: ExecutionState
-  keep: boolean
-  details: string
-}
-
-export type ParseResult = {
-  imports: Map<string, Import>
-  blocks: ExecutionBlock[]
-}
-
-export type ReplOptions = {
-  reevalConsole: boolean
-  reevalUndef: boolean
-  wrapAsync: boolean
-}
 
 export const parse = (source: string, opts: ReplOptions): ParseResult => {
   const ranges = splitRanges(source, '\n');
@@ -41,7 +13,7 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
     ts.ScriptKind.JS);
 
   const blocks: ExecutionBlock[] = [];
-  const imports = new Map<string, Import>();
+  //const imports = new Map<string, Import>();
 
   //console.log(ranges);
   for (const s of src.statements) {
@@ -52,11 +24,12 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
       statement: s.getText(),
       cumulative: true,
       span,
-      wrapAsync: false
+      wrapAsync: false,
+      kind: `run`
     };
 
     // By default, add the block
-    let addBlock = true;
+    //let addBlock = true;
 
     if (s.kind === ts.SyntaxKind.VariableStatement) {
       // eg. let x = 1;
@@ -76,7 +49,8 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
         }
       }
     } else if (s.kind == ts.SyntaxKind.ForOfStatement) {
-      block.wrapAsync = (`awaitModifier` in s);
+      // @ts-ignore
+      block.wrapAsync = s.awaitModifier !== undefined;
     } else if (s.kind === ts.SyntaxKind.ExpressionStatement) {
       // eg. Math.random();
       // Shouldn't be needed to push expressions if everything was purely functional,
@@ -92,23 +66,26 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
       const importS = s as ts.ImportDeclaration;
       const bindings = importS.importClause?.namedBindings as ts.NamedImportBindings;
       const moduleSpecifier = importS.moduleSpecifier.getText();
+      block.kind = `import`;
+      block.imports = new Map<string, Import>();
       if (`elements` in bindings) {
         for (const b of bindings.elements) {
           // import {foo} from 'foo.js'
-          imports.set(b.name.escapedText.toString(), {
+          block.imports.set(b.name.escapedText.toString(), {
             module: moduleSpecifier,
             named: true
           });
 
         }
-        addBlock = false;
+
+        //addBlock = false;
       } else if (`name` in bindings) {
         // import * as foo from 'foo.js'
-        imports.set(bindings.name.escapedText.toString(), {
+        block.imports.set(bindings.name.escapedText.toString(), {
           module: moduleSpecifier,
           named: false
         });
-        addBlock = false;
+        //addBlock = false;
       } else {
         console.warn(s);
       }
@@ -116,99 +93,9 @@ export const parse = (source: string, opts: ReplOptions): ParseResult => {
       //console.warn(s);
     }
 
-    if (addBlock) blocks.push(block);
+    blocks.push(block);
   }
 
-  return {
-    blocks, imports
-  };
+  return {blocks};
 }
 
-export async function resolveImports(imports: Map<string, Import>) {
-  let resolved = {};
-  for (const [name, imp] of imports) {
-    //console.log(name);
-    //console.log(`-> ${imp.module} named ${imp.named}`);
-
-    let module = await import(unwrap(imp.module, "'", '"'));
-
-    if (imp.named) {
-      const m = module[name];
-      //console.log(module);
-      //console.log(m);
-      if (m === undefined) {
-        throw new Error(`${name} not found in ${imp.module}`);
-      }
-      // @ts-ignore
-      resolved[name] = m;
-      // @ts-ignore
-      window[name] = m;
-    } else {
-      // @ts-ignore
-      resolved[name] = module;
-      // @ts-ignore
-      window[name] = m;
-    }
-  }
-  return resolved;
-}
-
-export async function execute(b: ExecutionBlock, context: any, prepend: string, opts: ReplOptions): Promise<ExecutionResult> {
-  let code = prepend + b.statement;
-  if (opts.wrapAsync) {
-    code = `(async () => {${code}})()`;
-  }
-
-  //console.log(`eval: ${code} with context: ${JSON.stringify(context)}`);
-  const r = function (src: string) {
-    return eval(src);
-  }
-
-  return new Promise((resolve, reject) => {
-    try {
-      const result = r.bind(context)(code);
-      const formatted = formatValue(result);
-      const er: ExecutionResult = {msg: formatted[0], details: formatted[1], keep: true, state: formatted[2]};
-
-      if (result === undefined && !opts.reevalUndef) er.keep = false;
-      resolve(er);
-    } catch (ex: unknown) {
-      if (ex instanceof Error) {
-        const er: ExecutionResult = {msg: ex.message, details: ex.toString(), state: `error`, keep: false};
-        resolve(er);
-      } else {
-        const er: ExecutionResult = {msg: (ex as any).toString(), details: ex as string, state: `error`, keep: false};
-        resolve(er);
-      }
-    }
-  });
-}
-
-const formatValue = (r: any): [string, string, ExecutionState] => {
-  let msg = r;
-  let title = r;
-  let state: ExecutionState = ``;
-  const t = typeof r;
-  if (r === undefined) {
-    msg = `undefined`;
-    state = `info`;
-  }
-  else if (r === null) {
-    msg = `null`;
-    state = `info`;
-  }
-  else if (t === `number`) {
-    msg = r.toString();
-  } else if (t === `string`) {
-    msg = `"${r.replace(`\n`, '\\n')}"`;
-  } else if (t === `object`) {
-    msg = JSON.stringify(r);
-  } else if (t === `function`) {
-    msg = `fn()`;
-    state = `info`;
-    title = r;
-  } else {
-    msg += ` [${t}]`;
-  }
-  return [msg, title, state];
-}
