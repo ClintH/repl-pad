@@ -81,7 +81,7 @@ export class ReplPadElement extends HTMLElement {
         lines++;
       }
 
-      let result: ExecutionResult = {msg: ``, state: `info`, keep: false, details: ``};
+      let result: ExecutionResult = {msg: `&nbsp;`, state: `info`, keep: false, details: ``};
       if (b.kind === `import` && b.imports) {
         const importResult = await resolveImports(b.imports);
         if (importResult.errors.length > 0) {
